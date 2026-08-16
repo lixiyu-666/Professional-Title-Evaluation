@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    dynamic:
+      p6spy: false
+      datasource:
+        master:
+          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+          username: root
+          password: root
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ruoyi123
+tenant:
+  enable: false
+spring.boot.admin.client:
+  enabled: false
+snail-job:
+  enabled: false
+mail:
+  enabled: false
+sms:
+  restricted: true

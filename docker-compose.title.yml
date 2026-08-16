@@ -2,17 +2,26 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_DATABASE: ruoyi-vue-plus
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ry-vue
+      MYSQL_ROOT_PASSWORD: root
     ports: ["3306:3306"]
-    volumes: ["./script/sql:/docker-entrypoint-initdb.d:ro"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./script/sql/ry_vue_5.X.sql:/docker-entrypoint-initdb.d/01-framework.sql:ro
+      - ./script/sql/ry_workflow.sql:/docker-entrypoint-initdb.d/02-workflow.sql:ro
+      - ./script/sql/title_evaluation_mvp.sql:/docker-entrypoint-initdb.d/03-title.sql:ro
   redis:
     image: redis:7-alpine
+    command: redis-server --requirepass ruoyi123
     ports: ["6379:6379"]
   minio:
     image: minio/minio:latest
     command: server /data --console-address :9001
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_ROOT_USER: ruoyi
+      MINIO_ROOT_PASSWORD: ruoyi123
     ports: ["9000:9000","9001:9001"]
+    volumes: ["minio_data:/data"]
+volumes:
+  mysql_data:
+  minio_data:
