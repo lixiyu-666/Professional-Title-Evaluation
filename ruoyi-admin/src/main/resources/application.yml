@@ -183,6 +183,16 @@ springdoc:
   api-docs:
     # 是否开启接口文档
     enabled: true
+  components:
+    security-schemes:
+      Authorization:
+        type: http
+        scheme: bearer
+        bearer-format: Sa-Token
+      ClientId:
+        type: apiKey
+        in: header
+        name: clientid
   info:
     # 标题
     title: '标题：RuoYi-Vue-Plus多租户管理系统_接口文档'
@@ -207,6 +217,8 @@ springdoc:
       packages-to-scan: org.dromara.generator
     - group: 5.工作流模块
       packages-to-scan: org.dromara.workflow
+    - group: 6.职称评审模块
+      packages-to-scan: org.dromara.title
 
 # 防止XSS攻击
 xss:

@@ -14,10 +14,16 @@ spring:
       password: ruoyi123
 tenant:
   enable: false
+captcha:
+  enable: false
+api-decrypt:
+  enabled: false
 spring.boot.admin.client:
   enabled: false
 snail-job:
   enabled: false
+  # ruoyi-job 的演示 Bean 即使禁用客户端仍会解析该占位符。
+  port: 2${server.port}
 mail:
   enabled: false
 sms:
