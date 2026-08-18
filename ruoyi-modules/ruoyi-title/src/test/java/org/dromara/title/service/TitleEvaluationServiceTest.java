@@ -5,12 +5,14 @@ import org.dromara.common.core.domain.model.LoginUser;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.title.domain.TitleApplication;
+import org.dromara.title.domain.TitleBatch;
 import org.dromara.title.mapper.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.mockito.MockedStatic;
 
 import java.util.Set;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -58,6 +60,36 @@ class TitleEvaluationServiceTest {
         }
         try (MockedStatic<LoginHelper> login = loginAs(9102L, TitleEvaluationService.ROLE_DEPARTMENT_REVIEWER)) {
             assertThrows(ServiceException.class, () -> service.getAccessible(100L));
+        }
+    }
+
+    @Test
+    void hrAdminCanPublishValidDraftBatch() {
+        TitleBatch batch = new TitleBatch();
+        batch.setId(9002L);
+        batch.setName("测试批次");
+        batch.setEvaluationYear(2026);
+        batch.setTitleSeries("工程系列");
+        batch.setTitleLevel("副高级");
+        batch.setApplicationType("正常晋升");
+        batch.setOpenAt(java.time.LocalDateTime.of(2026, 8, 1, 9, 0));
+        batch.setFirstSubmitDeadline(java.time.LocalDateTime.of(2026, 12, 1, 18, 0));
+        batch.setDefaultCorrectionHours(72);
+        batch.setRuleVersion("MVP-1.0");
+        batch.setPublished(false);
+        when(batches.selectById(9002L)).thenReturn(batch);
+
+        try (MockedStatic<LoginHelper> login = loginAs(9105L, TitleEvaluationService.ROLE_HR_ADMIN)) {
+            service.publishBatch(9002L);
+        }
+        org.junit.jupiter.api.Assertions.assertTrue(batch.getPublished());
+        verify(batches).updateById(batch);
+    }
+
+    @Test
+    void nonHrRoleCannotCreateBatch() {
+        try (MockedStatic<LoginHelper> login = loginAs(9101L, TitleEvaluationService.ROLE_APPLICANT)) {
+            assertThrows(ServiceException.class, () -> service.createBatch(Map.of()));
         }
     }
 

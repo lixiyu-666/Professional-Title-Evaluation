@@ -59,6 +59,53 @@ public class TitleEvaluationService {
         return batch;
     }
 
+    /** Human-resources administrators configure draft releases before publishing them. */
+    public List<TitleBatch> listManageableBatches() {
+        requireHrAdmin();
+        return batches.selectList(Wrappers.<TitleBatch>lambdaQuery()
+            .orderByDesc(TitleBatch::getEvaluationYear)
+            .orderByDesc(TitleBatch::getCreatedAt));
+    }
+
+    @Transactional
+    public TitleBatch createBatch(Map<String, Object> body) {
+        requireHrAdmin();
+        TitleBatch batch = new TitleBatch();
+        applyBatchFields(batch, body, true);
+        batch.setPublished(false);
+        batch.setCreatedAt(LocalDateTime.now());
+        batches.insert(batch);
+        auditBatch(batch, "BATCH_CREATE", "创建批次草稿");
+        return batch;
+    }
+
+    @Transactional
+    public TitleBatch updateBatch(Long id, Map<String, Object> body) {
+        requireHrAdmin();
+        TitleBatch batch = getBatch(id);
+        if (Boolean.TRUE.equals(batch.getPublished())) {
+            throw new IllegalStateException("已发布批次已锁定，不能修改配置");
+        }
+        applyBatchFields(batch, body, false);
+        batches.updateById(batch);
+        auditBatch(batch, "BATCH_UPDATE", "更新批次草稿配置");
+        return batch;
+    }
+
+    @Transactional
+    public TitleBatch publishBatch(Long id) {
+        requireHrAdmin();
+        TitleBatch batch = getBatch(id);
+        if (Boolean.TRUE.equals(batch.getPublished())) {
+            throw new IllegalStateException("批次已经发布");
+        }
+        validateBatch(batch);
+        batch.setPublished(true);
+        batches.updateById(batch);
+        auditBatch(batch, "BATCH_PUBLISH", "发布批次并锁定配置");
+        return batch;
+    }
+
     public List<TitleApplication> listMine() {
         Long userId = actor();
         return applications.selectList(Wrappers.<TitleApplication>lambdaQuery()
@@ -227,6 +274,75 @@ public class TitleEvaluationService {
             throw new NoSuchElementException("申报不存在");
         }
         return application;
+    }
+
+    private TitleBatch getBatch(Long id) {
+        TitleBatch batch = batches.selectById(id);
+        if (batch == null) {
+            throw new NoSuchElementException("批次不存在");
+        }
+        return batch;
+    }
+
+    private void applyBatchFields(TitleBatch batch, Map<String, Object> body, boolean creating) {
+        if (creating || body.containsKey("name")) batch.setName(text(body, "name"));
+        if (creating || body.containsKey("evaluationYear")) batch.setEvaluationYear(integer(body, "evaluationYear"));
+        if (creating || body.containsKey("titleSeries")) batch.setTitleSeries(text(body, "titleSeries"));
+        if (creating || body.containsKey("titleLevel")) batch.setTitleLevel(text(body, "titleLevel"));
+        if (creating || body.containsKey("applicationType")) batch.setApplicationType(text(body, "applicationType"));
+        if (creating || body.containsKey("openAt")) batch.setOpenAt(time(body, "openAt"));
+        if (creating || body.containsKey("firstSubmitDeadline")) batch.setFirstSubmitDeadline(time(body, "firstSubmitDeadline"));
+        if (creating || body.containsKey("defaultCorrectionHours")) batch.setDefaultCorrectionHours(integer(body, "defaultCorrectionHours"));
+        if (creating || body.containsKey("ruleVersion")) batch.setRuleVersion(text(body, "ruleVersion"));
+        if (body.containsKey("config")) batch.setConfigJson(write(body.get("config")));
+        validateBatch(batch);
+    }
+
+    private void validateBatch(TitleBatch batch) {
+        if (batch.getName() == null || batch.getName().isBlank() || batch.getEvaluationYear() == null
+            || batch.getTitleSeries() == null || batch.getTitleSeries().isBlank() || batch.getTitleLevel() == null
+            || batch.getTitleLevel().isBlank() || batch.getApplicationType() == null || batch.getApplicationType().isBlank()
+            || batch.getOpenAt() == null || batch.getFirstSubmitDeadline() == null || batch.getRuleVersion() == null || batch.getRuleVersion().isBlank()) {
+            throw new IllegalArgumentException("请完整填写批次基础配置");
+        }
+        if (!batch.getFirstSubmitDeadline().isAfter(batch.getOpenAt())) {
+            throw new IllegalArgumentException("首次提交截止时间必须晚于开放时间");
+        }
+        if (batch.getDefaultCorrectionHours() == null || batch.getDefaultCorrectionHours() <= 0 || batch.getDefaultCorrectionHours() > 720) {
+            throw new IllegalArgumentException("默认补正时长应在 1 至 720 小时之间");
+        }
+    }
+
+    private static String text(Map<String, Object> body, String key) {
+        Object value = body.get(key);
+        return value == null ? null : String.valueOf(value).trim();
+    }
+
+    private static Integer integer(Map<String, Object> body, String key) {
+        Object value = body.get(key);
+        return value == null ? null : Integer.valueOf(String.valueOf(value));
+    }
+
+    private static LocalDateTime time(Map<String, Object> body, String key) {
+        Object value = body.get(key);
+        return value == null ? null : LocalDateTime.parse(String.valueOf(value));
+    }
+
+    private void requireHrAdmin() {
+        actor();
+        if (!LoginHelper.isSuperAdmin() && !roles().contains(ROLE_HR_ADMIN)) {
+            throw new ServiceException("只有人事职称管理员可以维护批次", HttpStatus.HTTP_FORBIDDEN);
+        }
+    }
+
+    private void auditBatch(TitleBatch batch, String event, String reason) {
+        TitleAuditEvent auditEvent = new TitleAuditEvent();
+        auditEvent.setActorUserId(actor());
+        auditEvent.setActorRole(String.join(",", roles()));
+        auditEvent.setEventType(event);
+        auditEvent.setReason("批次[" + batch.getName() + "]：" + reason);
+        auditEvent.setOccurredAt(LocalDateTime.now());
+        audits.insert(auditEvent);
     }
 
     private void requireCanAccess(TitleApplication application) {

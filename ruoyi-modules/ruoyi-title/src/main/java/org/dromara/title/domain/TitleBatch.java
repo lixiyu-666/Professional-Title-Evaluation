@@ -21,6 +21,8 @@ public class TitleBatch {
     private LocalDateTime firstSubmitDeadline;
     private Integer defaultCorrectionHours;
     private String ruleVersion;
+    /** Material checklist, policy association and qualification notes for this release. */
+    private String configJson;
     private Boolean published;
     private LocalDateTime createdAt;
 }

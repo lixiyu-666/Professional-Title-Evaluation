@@ -1,9 +1,24 @@
 import request from '@/utils/request';
 import { AxiosPromise } from 'axios';
-import type { ApplicationFormData, AuditEvent, FieldDefinition, Id, PolicyAnswer, PrecheckResult, TitleApplication, TitleBatch } from './types';
+import type {
+  ApplicationFormData,
+  AuditEvent,
+  BatchConfigInput,
+  FieldDefinition,
+  Id,
+  PolicyAnswer,
+  PrecheckResult,
+  TitleApplication,
+  TitleBatch
+} from './types';
 
 export const listTitleBatches = (): AxiosPromise<TitleBatch[]> => request({ url: '/title/batches', method: 'get' });
 export const getTitleBatch = (id: Id): AxiosPromise<TitleBatch> => request({ url: `/title/batches/${id}`, method: 'get' });
+export const listManagedTitleBatches = (): AxiosPromise<TitleBatch[]> => request({ url: '/title/batches/manage', method: 'get' });
+export const createTitleBatch = (data: BatchConfigInput): AxiosPromise<TitleBatch> => request({ url: '/title/batches', method: 'post', data });
+export const updateTitleBatch = (id: Id, data: BatchConfigInput): AxiosPromise<TitleBatch> =>
+  request({ url: `/title/batches/${id}`, method: 'put', data });
+export const publishTitleBatch = (id: Id): AxiosPromise<TitleBatch> => request({ url: `/title/batches/${id}/publish`, method: 'post' });
 export const listMyApplications = (): AxiosPromise<TitleApplication[]> => request({ url: '/title/applications/mine', method: 'get' });
 export const listReviewTasks = (): AxiosPromise<TitleApplication[]> => request({ url: '/title/applications/review-tasks', method: 'get' });
 export const getTitleApplication = (id: Id): AxiosPromise<TitleApplication> => request({ url: `/title/applications/${id}`, method: 'get' });

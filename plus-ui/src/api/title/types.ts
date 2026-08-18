@@ -11,7 +11,21 @@ export interface TitleBatch {
   firstSubmitDeadline: string;
   defaultCorrectionHours: number;
   ruleVersion: string;
+  configJson?: string;
   published: boolean;
+}
+
+export interface BatchConfigInput {
+  name: string;
+  evaluationYear: number;
+  titleSeries: string;
+  titleLevel: string;
+  applicationType: string;
+  openAt: string;
+  firstSubmitDeadline: string;
+  defaultCorrectionHours: number;
+  ruleVersion: string;
+  config?: { materialChecklist?: string[]; policyDocumentIds?: string[]; qualificationNotes?: string };
 }
 
 export interface TitleApplication {

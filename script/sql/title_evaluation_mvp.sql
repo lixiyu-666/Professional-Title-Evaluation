@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS title_batch (
   id BIGINT PRIMARY KEY, name VARCHAR(128) NOT NULL, evaluation_year INT NOT NULL,
   title_series VARCHAR(64) NOT NULL DEFAULT '工程系列', title_level VARCHAR(32) NOT NULL DEFAULT '副高级',
   application_type VARCHAR(32) NOT NULL DEFAULT '正常晋升', open_at DATETIME NOT NULL, first_submit_deadline DATETIME NOT NULL,
-  default_correction_hours INT NOT NULL DEFAULT 72, rule_version VARCHAR(64) NOT NULL, published TINYINT NOT NULL DEFAULT 0,
+  default_correction_hours INT NOT NULL DEFAULT 72, rule_version VARCHAR(64) NOT NULL, config_json JSON NULL, published TINYINT NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS title_application (
@@ -104,6 +104,8 @@ INSERT INTO sys_menu VALUES
   (9113,'查询申报材料','9100','10','','','',1,0,'F','0','0','system:oss:query','#',103,1,SYSDATE(),NULL,NULL,''),
   (9114,'下载申报材料','9100','11','','','',1,0,'F','0','0','system:oss:download','#',103,1,SYSDATE(),NULL,NULL,''),
   (9115,'删除草稿材料','9102','5','','','',1,0,'F','0','0','system:oss:remove','#',103,1,SYSDATE(),NULL,NULL,'')
+  ,(9116,'批次管理','9100','5','batch-manage','title/batch/index','',1,0,'C','0','0','title:batch:manage','calendar',103,1,SYSDATE(),NULL,NULL,'人事职称管理员维护批次')
+  ,(9117,'发布批次','9116','1','','','',1,0,'F','0','0','title:batch:publish','#',103,1,SYSDATE(),NULL,NULL,'')
 ON DUPLICATE KEY UPDATE
   menu_name=VALUES(menu_name), parent_id=VALUES(parent_id), order_num=VALUES(order_num), path=VALUES(path),
   component=VALUES(component), menu_type=VALUES(menu_type), perms=VALUES(perms), icon=VALUES(icon), status='0';
@@ -116,4 +118,4 @@ INSERT IGNORE INTO sys_role_menu (role_id,menu_id) VALUES
   (9102,9100),(9102,9101),(9102,9103),(9102,9104),(9102,9105),(9102,9109),(9102,9111),(9102,9113),(9102,9114),
   (9103,9100),(9103,9101),(9103,9103),(9103,9104),(9103,9105),(9103,9109),(9103,9111),(9103,9113),(9103,9114),
   (9104,9100),(9104,9101),(9104,9103),(9104,9104),(9104,9105),(9104,9109),(9104,9111),(9104,9113),(9104,9114),
-  (9105,9100),(9105,9101),(9105,9103),(9105,9104),(9105,9105),(9105,9109),(9105,9110),(9105,9111),(9105,9113),(9105,9114);
+  (9105,9100),(9105,9101),(9105,9103),(9105,9104),(9105,9105),(9105,9109),(9105,9110),(9105,9111),(9105,9113),(9105,9114),(9105,9116),(9105,9117);

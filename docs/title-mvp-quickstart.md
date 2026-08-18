@@ -26,6 +26,8 @@ Get-Content -Raw -Encoding UTF8 script\sql\title_evaluation_mvp.sql |
   docker compose -f docker-compose.title.yml exec -T mysql mysql --default-character-set=utf8mb4 -uroot -proot ry-vue
 Get-Content -Raw -Encoding UTF8 script\sql\title_encoding_repair.sql |
   docker compose -f docker-compose.title.yml exec -T mysql mysql --default-character-set=utf8mb4 -uroot -proot ry-vue
+Get-Content -Raw -Encoding UTF8 script\sql\title_batch_management_migration.sql |
+  docker compose -f docker-compose.title.yml exec -T mysql mysql --default-character-set=utf8mb4 -uroot -proot ry-vue
 ```
 
 ## 2. 启动后端
@@ -59,7 +61,7 @@ pnpm dev
 - 部门领导：`title_dept_leader`
 - 人事职称管理员：`title_hr_admin`
 
-申请人只显示职称首页、我的申报和政策助手；其余四个角色显示职称首页、审核工作台和政策助手。
+申请人只显示职称首页、我的申报和政策助手；审核角色显示职称首页、审核工作台和政策助手；人事职称管理员额外显示“批次管理”。批次发布后配置锁定，不能直接修改。
 
 ## 验证命令
 
