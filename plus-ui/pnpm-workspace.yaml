@@ -1,0 +1,5 @@
+nodeLinker: hoisted
+confirmModulesPurge: false
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true

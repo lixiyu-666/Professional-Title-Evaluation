@@ -6,6 +6,7 @@ import org.dromara.common.core.domain.R;
 import org.dromara.title.domain.TitleApplication;
 import org.dromara.title.domain.TitleAuditEvent;
 import org.dromara.title.service.TitleEvaluationService;
+import org.dromara.title.service.TitleFieldCatalogService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
@@ -52,6 +53,18 @@ public class TitleApplicationController {
     @PostMapping("/{id}/submit")
     public R<TitleApplication> submit(@PathVariable Long id) {
         return R.ok(service.submit(id));
+    }
+
+    @SaCheckPermission("title:application:update")
+    @PostMapping("/{id}/precheck")
+    public R<TitleFieldCatalogService.PrecheckResult> precheck(@PathVariable Long id) {
+        return R.ok(service.precheck(id));
+    }
+
+    @SaCheckPermission("title:application:query")
+    @GetMapping("/field-definitions")
+    public R<List<TitleFieldCatalogService.FieldDefinition>> fieldDefinitions() {
+        return R.ok(service.fieldDefinitions());
     }
 
     @SaCheckPermission("title:application:review")

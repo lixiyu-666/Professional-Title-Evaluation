@@ -38,6 +38,7 @@ public class TitleEvaluationService {
     private final TitleReviewMapper reviews;
     private final TitleAuditMapper audits;
     private final ObjectMapper json;
+    private final TitleFieldCatalogService fields;
 
     public List<TitleBatch> listPublishedBatches() {
         actor();
@@ -126,6 +127,11 @@ public class TitleEvaluationService {
     public TitleApplication submit(Long id) {
         TitleApplication application = getOwned(id);
         allow(application, "DRAFT", "CORRECTION_REQUIRED");
+        Map<String, Object> form = read(application.getFormJson());
+        TitleFieldCatalogService.PrecheckResult precheck = fields.precheck(form);
+        if (!precheck.passed()) {
+            throw new IllegalStateException("资格预检存在阻断项，请先完成必填字段和材料");
+        }
         String before = application.getStatus();
         application.setCurrentVersion(application.getCurrentVersion() + 1);
         application.setStatus("PENDING_DEPARTMENT_REVIEW");
@@ -135,13 +141,24 @@ public class TitleEvaluationService {
         version.setApplicationId(id);
         version.setVersionNo(application.getCurrentVersion());
         version.setFormSnapshot(application.getFormJson());
-        version.setMaterialSnapshot("[]");
-        version.setPrecheckSnapshot("{}");
+        version.setMaterialSnapshot(write(form.getOrDefault("materials", List.of())));
+        version.setPrecheckSnapshot(write(precheck));
         version.setSubmittedAt(LocalDateTime.now());
         versions.insert(version);
         applications.updateById(application);
         audit(application, "SUBMIT_V" + application.getCurrentVersion(), before, application.getStatus(), "提交版本快照");
         return application;
+    }
+
+    public TitleFieldCatalogService.PrecheckResult precheck(Long id) {
+        TitleApplication application = getOwned(id);
+        allow(application, "DRAFT", "CORRECTION_REQUIRED");
+        return fields.precheck(read(application.getFormJson()));
+    }
+
+    public List<TitleFieldCatalogService.FieldDefinition> fieldDefinitions() {
+        actor();
+        return fields.definitions();
     }
 
     @Transactional

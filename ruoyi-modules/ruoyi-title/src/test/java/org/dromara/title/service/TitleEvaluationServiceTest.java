@@ -24,8 +24,9 @@ class TitleEvaluationServiceTest {
     private final TitleVersionMapper versions = mock(TitleVersionMapper.class);
     private final TitleReviewMapper reviews = mock(TitleReviewMapper.class);
     private final TitleAuditMapper audits = mock(TitleAuditMapper.class);
+    private final TitleFieldCatalogService fields = mock(TitleFieldCatalogService.class);
     private final TitleEvaluationService service = new TitleEvaluationService(
-        batches, applications, versions, reviews, audits, new ObjectMapper());
+        batches, applications, versions, reviews, audits, new ObjectMapper(), fields);
 
     @Test
     void applicantCanReadOwnApplication() {

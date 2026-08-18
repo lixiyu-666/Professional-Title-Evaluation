@@ -1,3 +1,7 @@
+# 职称评审系统 MVP
+
+本仓库已在 RuoYi-Vue-Plus 5.6.2 上增加职称申报、四级审核、149 字段五步表单、材料接口、资格预检和政策检索助手。前端位于 `plus-ui/`，本地完整启动步骤见 [职称评审系统 MVP 本地启动](docs/title-mvp-quickstart.md)。
+
 <img src="https://foruda.gitee.com/images/1679673773341074847/178e8451_1766278.png" width="50%" height="50%">
 <div style="height: 10px; clear: both;"></div>
 
