@@ -10,6 +10,7 @@ services:
       - ./script/sql/ry_vue_5.X.sql:/docker-entrypoint-initdb.d/01-framework.sql:ro
       - ./script/sql/ry_workflow.sql:/docker-entrypoint-initdb.d/02-workflow.sql:ro
       - ./script/sql/title_evaluation_mvp.sql:/docker-entrypoint-initdb.d/03-title.sql:ro
+      - ./script/sql/title_encoding_repair.sql:/docker-entrypoint-initdb.d/04-encoding-repair.sql:ro
   redis:
     image: redis:7-alpine
     command: redis-server --requirepass ruoyi123

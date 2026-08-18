@@ -24,6 +24,8 @@ docker compose -f docker-compose.title.yml ps
 ```powershell
 Get-Content -Raw -Encoding UTF8 script\sql\title_evaluation_mvp.sql |
   docker compose -f docker-compose.title.yml exec -T mysql mysql --default-character-set=utf8mb4 -uroot -proot ry-vue
+Get-Content -Raw -Encoding UTF8 script\sql\title_encoding_repair.sql |
+  docker compose -f docker-compose.title.yml exec -T mysql mysql --default-character-set=utf8mb4 -uroot -proot ry-vue
 ```
 
 ## 2. 启动后端
